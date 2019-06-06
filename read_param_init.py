@@ -12,7 +12,8 @@ LSTM_1_W = torchfile.load('../lstm-char-cnn/param_init_4.t7')
 LSTM_B   = torchfile.load('../lstm-char-cnn/param_init_5.t7')
 LSTM_2_W = torchfile.load('../lstm-char-cnn/param_init_6.t7')
 
-# following manipulations make LSTM_W usable with BasicLSTMCell - need to flip some blocks to convert from Karpathy's LSTM implementation
+# following manipulations make LSTM_W usable with BasicLSTMCell - need to flip some blocks to convert from Karpathy's
+# -LSTM implementation
 LSTM_W = np.concatenate([LSTM_1_W, LSTM_2_W], axis=1)
 a, b, c, d = np.split(LSTM_W, 4, axis=0)
 LSTM_W = np.concatenate([a, d, c, b], axis=0)

@@ -151,13 +151,19 @@ def inference_graph(char_vocab_size, word_vocab_size,
     ''' Finally, do LSTM '''
     with tf.variable_scope('LSTM'):
         def create_rnn_cell():
-            cell = tf.contrib.rnn.BasicLSTMCell(rnn_size, state_is_tuple=True, forget_bias=0.0, reuse=False)
+
+            #cell = tf.keras.layers.LSTMCell(rnn_size, use_bias=True)
+            cell = tf.nn.rnn_cell.LSTMCell(rnn_size, state_is_tuple=True, forget_bias=0.0, reuse=False)
+            #cell = tf.contrib.rnn.BasicLSTMCell(rnn_size, state_is_tuple=True, forget_bias=0.0, reuse=False)
             if dropout > 0.0:
-                cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=1.-dropout)
+
+                cell=tf.nn.rnn_cell.DropoutWrapper(cell,output_keep_prob=1.-dropout)
+                #cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=1.-dropout)
             return cell
         
         if num_rnn_layers > 1:
-            cell = tf.contrib.rnn.MultiRNNCell([create_rnn_cell() for _ in range(num_rnn_layers)], state_is_tuple=True)
+            cell = tf.nn.rnn_cell.MultiRNNCell([create_rnn_cell() for _ in range(num_rnn_layers)], state_is_tuple=True)
+            #cell = tf.contrib.rnn.MultiRNNCell([create_rnn_cell() for _ in range(num_rnn_layers)], state_is_tuple=True)
         else:
             cell = create_rnn_cell()
 
@@ -166,8 +172,10 @@ def inference_graph(char_vocab_size, word_vocab_size,
         input_cnn = tf.reshape(input_cnn, [batch_size, num_unroll_steps, -1])
         input_cnn2 = [tf.squeeze(x, [1]) for x in tf.split(input_cnn, num_unroll_steps, 1)]
 
-        outputs, final_rnn_state = tf.contrib.rnn.static_rnn(cell, input_cnn2,
-                                         initial_state=initial_rnn_state, dtype=tf.float32)
+        outputs, final_rnn_state = tf.nn.static_rnn(cell, input_cnn2,
+                                                             initial_state=initial_rnn_state, dtype=tf.float32)
+        #outputs, final_rnn_state = tf.contrib.rnn.static_rnn(cell, input_cnn2,
+         #                                initial_state=initial_rnn_state, dtype=tf.float32)
 
         # linear projection onto output (word) vocab
         logits = []
